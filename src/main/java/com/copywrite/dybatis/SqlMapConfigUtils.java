@@ -18,52 +18,52 @@ import java.util.Iterator;
 import java.util.List;
 
 public final class SqlMapConfigUtils {
-	
-	@SuppressWarnings("unchecked")
-	public static List <FileDesc> readSqlMapFileMapping(InputStream sqlMapConfig, String resouceProjectPath) {
-		try {
-			InputStream is = sqlMapConfig;
-			InputStreamReader isr = new InputStreamReader(is, "utf-8");
-			
-			SAXBuilder builder = new SAXBuilder();
-			builder.setEntityResolver(new NoOpEntityResolver());
-			Document doc = builder.build(isr);
-			Element root = doc.getRootElement();
-			List list = root.getChildren("sqlMap");
-			List <FileDesc> retList = new ArrayList<FileDesc>();
-			for(Iterator it = list.listIterator(); it.hasNext(); ) {
-				Element e = (Element) it.next();
-				String loc = e.getAttribute("resource").getValue();
-				URL url = SqlMapConfigUtils.class.getClassLoader().getResource(loc);
-				File file= new File(url.getFile());
-				long lastTm = file.lastModified();
+
+    @SuppressWarnings("unchecked")
+    public static List<FileDesc> readSqlMapFileMapping(InputStream sqlMapConfig, String resouceProjectPath) {
+        try {
+            InputStream is = sqlMapConfig;
+            InputStreamReader isr = new InputStreamReader(is, "utf-8");
+
+            SAXBuilder builder = new SAXBuilder();
+            builder.setEntityResolver(new NoOpEntityResolver());
+            Document doc = builder.build(isr);
+            Element root = doc.getRootElement();
+            List list = root.getChildren("sqlMap");
+            List<FileDesc> retList = new ArrayList<FileDesc>();
+            for (Iterator it = list.listIterator(); it.hasNext(); ) {
+                Element e = (Element) it.next();
+                String loc = e.getAttribute("resource").getValue();
+                URL url = SqlMapConfigUtils.class.getClassLoader().getResource(loc);
+                File file = new File(url.getFile());
+                long lastTm = file.lastModified();
                 String name = file.getName();
 
                 CloseableHttpClient httpclient = HttpClients.createDefault();
-                HttpGet httpGet = new HttpGet("http://localhost:63342/" + resouceProjectPath + name);
+                HttpGet httpGet = new HttpGet("http://127.0.0.1:63342" + resouceProjectPath + name);
                 CloseableHttpResponse response = httpclient.execute(httpGet);
                 HttpEntity entity = response.getEntity();
                 InputStream remoteIs = entity.getContent();
                 String md5 = DigestUtils.md5Hex(remoteIs);
-				FileDesc fd = new FileDesc(name, lastTm, md5);
-				retList.add(fd);
+                FileDesc fd = new FileDesc(name, lastTm, md5);
+                retList.add(fd);
 
                 response.close();
-			}
-			return retList;
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		return new ArrayList<FileDesc>();
-	}
-	
-	public static List <String> readSqlMap(FileDesc fd, String resouceProjectPath) {
-		try {
-			String path = fd.getPath();
-			String name = new File(path).getName();
+            }
+            return retList;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return new ArrayList<FileDesc>();
+    }
+
+    public static List<String> readSqlMap(FileDesc fd, String resouceProjectPath) {
+        try {
+            String path = fd.getPath();
+            String name = new File(path).getName();
             CloseableHttpClient httpclient = HttpClients.createDefault();
-            HttpGet httpGet = new HttpGet("http://localhost:63342/" + resouceProjectPath + name);
+            HttpGet httpGet = new HttpGet("http://127.0.0.1:63342" + resouceProjectPath + name);
             CloseableHttpResponse response = httpclient.execute(httpGet);
             HttpEntity entity = response.getEntity();
             InputStream is = entity.getContent();
@@ -73,12 +73,12 @@ public final class SqlMapConfigUtils {
             Document doc = builder.build(isr);
             Element root = doc.getRootElement();
             String namespace = null;
-            if ( root.getAttribute("namespace") != null) {
-                namespace =  root.getAttribute("namespace").getValue();
+            if (root.getAttribute("namespace") != null) {
+                namespace = root.getAttribute("namespace").getValue();
             }
             List list = root.getChildren();
-            List <String> retList = new ArrayList<String>();
-            for(Iterator it = list.listIterator(); it.hasNext(); ) {
+            List<String> retList = new ArrayList<String>();
+            for (Iterator it = list.listIterator(); it.hasNext(); ) {
                 Element e = (Element) it.next();
                 String tagName = e.getName();
                 if ("statement".equals(tagName) || "insert".equals(tagName)
@@ -86,8 +86,8 @@ public final class SqlMapConfigUtils {
                         || "select".equals(tagName)
                         || "procedure".equals(tagName)) {
                     String id = e.getAttribute("id").getValue();
-                    if ( namespace != null ) {
-                        if(id.indexOf(namespace + ".") == -1) {
+                    if (namespace != null) {
+                        if (id.indexOf(".") == -1) {
                             id = namespace + "." + id;
                         }
                     }
@@ -96,11 +96,12 @@ public final class SqlMapConfigUtils {
             }
 
             return retList;
-		} catch (UnsupportedEncodingException e) {
-		} catch (JDOMException e) {
-		} catch (IOException e) {e.printStackTrace();
-		}
-		
-		return new ArrayList<String>();
-	}
+        } catch (UnsupportedEncodingException e) {
+        } catch (JDOMException e) {
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return new ArrayList<String>();
+    }
 }

@@ -51,7 +51,7 @@ public class DySqlMapExecutorDelegate extends SqlMapExecutorDelegate {
             String name = file.getName();
 
             CloseableHttpClient httpclient = HttpClients.createDefault();
-            HttpGet httpGet = new HttpGet("http://localhost:63342/" + resouceProjectPath + name);
+            HttpGet httpGet = new HttpGet("http://127.0.0.1:63342" + resouceProjectPath + name);
             CloseableHttpResponse response = httpclient.execute(httpGet);
 
             try {
@@ -161,5 +161,11 @@ public class DySqlMapExecutorDelegate extends SqlMapExecutorDelegate {
 		checkAndRefreshSqlMap(id);
 		return this.delegate.update(sessionScope, id, param);
 	}
-	
+
+    @Override
+    public Object insert(SessionScope sessionScope, String id, Object param)
+            throws SQLException {
+        checkAndRefreshSqlMap(id);
+        return this.delegate.insert(sessionScope, id, param);
+    }
 }
