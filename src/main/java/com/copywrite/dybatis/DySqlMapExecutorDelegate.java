@@ -168,4 +168,18 @@ public class DySqlMapExecutorDelegate extends SqlMapExecutorDelegate {
         checkAndRefreshSqlMap(id);
         return this.delegate.insert(sessionScope, id, param);
     }
+
+    /**
+     * Get a mappedstatement by its ID
+     *
+     * @param id - the statement ID
+     * @return - the mapped statement
+     */
+    public MappedStatement getMappedStatement(String id) {
+        MappedStatement ms = (MappedStatement) this.delegate.getMappedStatement(id);
+        if (ms == null) {
+            throw new SqlMapException("There is no statement named " + id + " in this SqlMap.");
+        }
+        return ms;
+    }
 }
